@@ -6,7 +6,6 @@ import itertools
 import random
 
 # Set page title and configuration
-st.set_page_config(page_title="Poker Hand Analyzer", layout="wide")
 
 # Define card suits and ranks
 SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
@@ -275,171 +274,263 @@ def is_mobile():
     except:
         # Default to desktop if we can't detect
         return False
-
-# Add custom CSS for responsiveness
-st.markdown("""
-<style>
-    /* Responsive containers */
-    .responsive-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-items: flex-start;
-    }
-    
-    .card-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    /* Card selection grid */
-    .card-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-        gap: 5px;
-    }
-    
-    .card-button {
-        width: 100%;
-        aspect-ratio: 2/3;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    /* Ensure select boxes don't overflow on mobile */
-    .stSelectbox {
-        max-width: 100%;
-        overflow: hidden;
-    }
-    
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
-        .mobile-full-width {
-            width: 100% !important;
-            flex-basis: 100% !important;
-            max-width: 100% !important;
+def run():
+    # Add custom CSS for responsiveness
+    st.markdown("""
+    <style>
+        /* Responsive containers */
+        .responsive-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: flex-start;
         }
         
-        .mobile-centered {
-            text-align: center;
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         
-        .mobile-smaller-text {
-            font-size: 0.9rem !important;
+        /* Card selection grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 5px;
         }
         
-        /* Make cards wrap appropriately on mobile */
-        .card-wrapper {
-            display: inline-block;
-            width: 45%;
-            margin: 2%;
+        .card-button {
+            width: 100%;
+            aspect-ratio: 2/3;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-    }
-    
-    /* Custom styling for the tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        height: 40px;
-        white-space: pre-wrap;
-        background-color: #f0f2f6;
-        border-radius: 4px;
-        padding: 8px 16px;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background-color: #e3e7ed;
-        font-weight: bold;
-    }
-    
-    /* Card placeholder hover effect */
-    .card-placeholder:hover {
-        background-color: #f0f0f0;
-        border-color: #999;
-    }
-</style>
-""", unsafe_allow_html=True)
+        
+        /* Ensure select boxes don't overflow on mobile */
+        .stSelectbox {
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .mobile-full-width {
+                width: 100% !important;
+                flex-basis: 100% !important;
+                max-width: 100% !important;
+            }
+            
+            .mobile-centered {
+                text-align: center;
+            }
+            
+            .mobile-smaller-text {
+                font-size: 0.9rem !important;
+            }
+            
+            /* Make cards wrap appropriately on mobile */
+            .card-wrapper {
+                display: inline-block;
+                width: 45%;
+                margin: 2%;
+            }
+        }
+        
+        /* Custom styling for the tabs */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            height: 40px;
+            white-space: pre-wrap;
+            background-color: #f0f2f6;
+            border-radius: 4px;
+            padding: 8px 16px;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            background-color: #e3e7ed;
+            font-weight: bold;
+        }
+        
+        /* Card placeholder hover effect */
+        .card-placeholder:hover {
+            background-color: #f0f0f0;
+            border-color: #999;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-# Streamlit app layout
-st.title("Single Player Poker Hand Analyzer")
+    # Streamlit app layout
+    st.title("Single Player Poker Hand Analyzer")
 
-# Sidebar for configuration
-st.sidebar.header("Game Settings")
-num_community = st.sidebar.slider("Number of Community Cards", 0, 5, 3)
+    # Sidebar for configuration
+    st.sidebar.header("Game Settings")
+    num_community = st.sidebar.slider("Number of Community Cards", 0, 5, 3)
 
-# Flag for mobile detection
-mobile_view = is_mobile()
+    # Flag for mobile detection
+    mobile_view = is_mobile()
 
-# Initialize session state to track selected cards
-if 'community_cards' not in st.session_state:
-    st.session_state.community_cards = []
-if 'player_cards' not in st.session_state:
-    st.session_state.player_cards = []
-if 'editing_card' not in st.session_state:
-    st.session_state.editing_card = None
+    # Initialize session state to track selected cards
+    if 'community_cards' not in st.session_state:
+        st.session_state.community_cards = []
+    if 'player_cards' not in st.session_state:
+        st.session_state.player_cards = []
+    if 'editing_card' not in st.session_state:
+        st.session_state.editing_card = None
 
-# Function to add a card to a specific location
-def add_card_at_index(card_type, index, card):
-    if card_type == "community":
-        # Ensure the list is long enough
-        while len(st.session_state.community_cards) <= index:
+    # Function to add a card to a specific location
+    def add_card_at_index(card_type, index, card):
+        if card_type == "community":
+            # Ensure the list is long enough
+            while len(st.session_state.community_cards) <= index:
+                st.session_state.community_cards.append(None)
+            st.session_state.community_cards[index] = card
+        else:  # player
+            # Ensure the list is long enough
+            while len(st.session_state.player_cards) <= index:
+                st.session_state.player_cards.append(None)
+            st.session_state.player_cards[index] = card
+
+    # Function to remove a card
+    def remove_card(card_type, index):
+        if card_type == "community":
+            if index < len(st.session_state.community_cards):
+                st.session_state.community_cards[index] = None
+        else:  # player
+            if index < len(st.session_state.player_cards):
+                st.session_state.player_cards[index] = None
+
+    # Community Cards - improved visual layout
+    # st.header("Community Cards")
+
+    # Check if we're in editing mode
+    if st.session_state.editing_card:
+        card_type, index = st.session_state.editing_card
+        already_selected = st.session_state.community_cards + st.session_state.player_cards
+        already_selected = [card for card in already_selected if card is not None]
+        
+        selected_card = card_selector(f"edit_{card_type}_{index}", already_selected)
+        
+        if selected_card:
+            add_card_at_index(card_type, index, selected_card)
+            st.session_state.editing_card = None
+            st.rerun()  # Refresh the page
+        
+        if st.button("Cancel"):
+            st.session_state.editing_card = None
+            st.rerun()
+    else:
+        # Visual card display for community cards
+        st.subheader("Community Cards")
+        community_cols = st.columns(5)
+        
+        # Ensure community_cards has enough slots
+        while len(st.session_state.community_cards) < 5:
             st.session_state.community_cards.append(None)
-        st.session_state.community_cards[index] = card
-    else:  # player
-        # Ensure the list is long enough
-        while len(st.session_state.player_cards) <= index:
+        for i in range(5):
+            with community_cols[i]:
+                # Check if this position should have a card based on num_community
+                if i < num_community:
+                    if st.session_state.community_cards[i]:
+                        # Display the card
+                        rank, suit = st.session_state.community_cards[i]
+                        st.markdown(render_card(rank, suit), unsafe_allow_html=True)
+                        
+                        # Better button styling with CSS
+                        st.markdown("""
+                        <style>
+                        .button-row {
+                            display: flex;
+                            gap: 8px;
+                            margin-top: 5px;
+                        }
+                        .edit-btn, .remove-btn {
+                            flex: 1;
+                            text-align: center;
+                            padding: 3px 0;
+                            border-radius: 4px;
+                            font-size: 0.8em;
+                            cursor: pointer;
+                            transition: background-color 0.3s;
+                        }
+                        .edit-btn {
+                            background-color: #f0f2f6;
+                            border: 1px solid #ddd;
+                            color: #262730;
+                        }
+                        .remove-btn {
+                            background-color: #ff4b4b;
+                            border: 1px solid #ff4b4b;
+                            color: white;
+                        }
+                        .edit-btn:hover {
+                            background-color: #e6e9ef;
+                        }
+                        .remove-btn:hover {
+                            background-color: #ff3333;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+                        
+                        # Create a container for the buttons
+                        button_container = st.container()
+                        
+                        # Use columns with better spacing
+                        col1, col2 = st.columns([1, 1])
+                        with col1:
+                            if st.button("✏️ Edit", key=f"edit_comm_{i}", use_container_width=True):
+                                st.session_state.editing_card = ("community", i)
+                                st.rerun()
+                        with col2:
+                            if st.button("❌", key=f"remove_comm_{i}", use_container_width=True):
+                                remove_card("community", i)
+                                st.rerun()
+                    else:
+                        # Display a placeholder "+" card with improved styling
+                        st.markdown("""
+                        <style>
+                        .add-card-btn {
+                            background-color: #f0f2f6;
+                            border: 1px dashed #ddd;
+                            border-radius: 8px;
+                            color: #262730;
+                            padding: 20px 0;
+                            text-align: center;
+                            cursor: pointer;
+                            margin-top: 10px;
+                            transition: background-color 0.3s;
+                        }
+                        .add-card-btn:hover {
+                            background-color: #e6e9ef;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+                        
+                        if st.button("➕ Add Card", key=f"add_comm_{i}", use_container_width=True):
+                            st.session_state.editing_card = ("community", i)
+                            st.rerun()
+                else:
+                    st.markdown("##")
+                    st.markdown("*No card*")
+        
+        # Player hand - improved visual layout
+        st.subheader("Your Hand")
+        player_cols = st.columns(5)
+        
+        # Ensure player_cards has enough slots
+        while len(st.session_state.player_cards) < 2:
             st.session_state.player_cards.append(None)
-        st.session_state.player_cards[index] = card
-
-# Function to remove a card
-def remove_card(card_type, index):
-    if card_type == "community":
-        if index < len(st.session_state.community_cards):
-            st.session_state.community_cards[index] = None
-    else:  # player
-        if index < len(st.session_state.player_cards):
-            st.session_state.player_cards[index] = None
-
-# Community Cards - improved visual layout
-st.header("Community Cards")
-
-# Check if we're in editing mode
-if st.session_state.editing_card:
-    card_type, index = st.session_state.editing_card
-    already_selected = st.session_state.community_cards + st.session_state.player_cards
-    already_selected = [card for card in already_selected if card is not None]
-    
-    selected_card = card_selector(f"edit_{card_type}_{index}", already_selected)
-    
-    if selected_card:
-        add_card_at_index(card_type, index, selected_card)
-        st.session_state.editing_card = None
-        st.rerun()  # Refresh the page
-    
-    if st.button("Cancel"):
-        st.session_state.editing_card = None
-        st.rerun()
-else:
-    # Visual card display for community cards
-    st.subheader("Community Cards")
-    community_cols = st.columns(5)
-    
-    # Ensure community_cards has enough slots
-    while len(st.session_state.community_cards) < 5:
-        st.session_state.community_cards.append(None)
-    for i in range(5):
-        with community_cols[i]:
-            # Check if this position should have a card based on num_community
-            if i < num_community:
-                if st.session_state.community_cards[i]:
+        
+        for i in range(2):
+            with player_cols[i]:
+                if st.session_state.player_cards[i]:
                     # Display the card
-                    rank, suit = st.session_state.community_cards[i]
+                    rank, suit = st.session_state.player_cards[i]
                     st.markdown(render_card(rank, suit), unsafe_allow_html=True)
                     
                     # Better button styling with CSS
@@ -484,12 +575,12 @@ else:
                     # Use columns with better spacing
                     col1, col2 = st.columns([1, 1])
                     with col1:
-                        if st.button("✏️ Edit", key=f"edit_comm_{i}", use_container_width=True):
-                            st.session_state.editing_card = ("community", i)
+                        if st.button("✏️ Edit", key=f"edit_player_{i}", use_container_width=True):
+                            st.session_state.editing_card = ("player", i)
                             st.rerun()
                     with col2:
-                        if st.button("❌", key=f"remove_comm_{i}", use_container_width=True):
-                            remove_card("community", i)
+                        if st.button("❌", key=f"remove_player_{i}", use_container_width=True):
+                            remove_card("player", i)
                             st.rerun()
                 else:
                     # Display a placeholder "+" card with improved styling
@@ -512,266 +603,174 @@ else:
                     </style>
                     """, unsafe_allow_html=True)
                     
-                    if st.button("➕ Add Card", key=f"add_comm_{i}", use_container_width=True):
-                        st.session_state.editing_card = ("community", i)
-                        st.rerun()
-            else:
-                st.markdown("##")
-                st.markdown("*No card*")
-    
-    # Player hand - improved visual layout
-    st.subheader("Your Hand")
-    player_cols = st.columns(5)
-    
-    # Ensure player_cards has enough slots
-    while len(st.session_state.player_cards) < 2:
-        st.session_state.player_cards.append(None)
-    
-    for i in range(2):
-        with player_cols[i]:
-            if st.session_state.player_cards[i]:
-                # Display the card
-                rank, suit = st.session_state.player_cards[i]
-                st.markdown(render_card(rank, suit), unsafe_allow_html=True)
-                
-                # Better button styling with CSS
-                st.markdown("""
-                <style>
-                .button-row {
-                    display: flex;
-                    gap: 8px;
-                    margin-top: 5px;
-                }
-                .edit-btn, .remove-btn {
-                    flex: 1;
-                    text-align: center;
-                    padding: 3px 0;
-                    border-radius: 4px;
-                    font-size: 0.8em;
-                    cursor: pointer;
-                    transition: background-color 0.3s;
-                }
-                .edit-btn {
-                    background-color: #f0f2f6;
-                    border: 1px solid #ddd;
-                    color: #262730;
-                }
-                .remove-btn {
-                    background-color: #ff4b4b;
-                    border: 1px solid #ff4b4b;
-                    color: white;
-                }
-                .edit-btn:hover {
-                    background-color: #e6e9ef;
-                }
-                .remove-btn:hover {
-                    background-color: #ff3333;
-                }
-                </style>
-                """, unsafe_allow_html=True)
-                
-                # Create a container for the buttons
-                button_container = st.container()
-                
-                # Use columns with better spacing
-                col1, col2 = st.columns([1, 1])
-                with col1:
-                    if st.button("✏️ Edit", key=f"edit_player_{i}", use_container_width=True):
+                    if st.button("➕ Add Card", key=f"add_player_{i}", use_container_width=True):
                         st.session_state.editing_card = ("player", i)
                         st.rerun()
-                with col2:
-                    if st.button("❌", key=f"remove_player_{i}", use_container_width=True):
-                        remove_card("player", i)
-                        st.rerun()
-            else:
-                # Display a placeholder "+" card with improved styling
-                st.markdown("""
-                <style>
-                .add-card-btn {
-                    background-color: #f0f2f6;
-                    border: 1px dashed #ddd;
-                    border-radius: 8px;
-                    color: #262730;
-                    padding: 20px 0;
-                    text-align: center;
-                    cursor: pointer;
-                    margin-top: 10px;
-                    transition: background-color 0.3s;
-                }
-                .add-card-btn:hover {
-                    background-color: #e6e9ef;
-                }
-                </style>
-                """, unsafe_allow_html=True)
-                
-                if st.button("➕ Add Card", key=f"add_player_{i}", use_container_width=True):
-                    st.session_state.editing_card = ("player", i)
-                    st.rerun()
-    
-    # Clean up community cards list to remove None values
-    community_cards = [card for card in st.session_state.community_cards if card is not None]
-    player_cards = [card for card in st.session_state.player_cards if card is not None]
-    
-    all_cards = community_cards + player_cards
-    
-    # Check for duplicate cards
-    if len(all_cards) != len(set(all_cards)):
-        st.error("Duplicate cards detected! Please choose different cards.")
-    elif all_cards:  # Only analyze if we have cards
-        # Analyze hand
-        st.header("Hand Analysis")
         
-        # Current hand
-        hand_value, hand_name, best_cards = evaluate_hand(player_cards + community_cards)
-        st.subheader(f"Current Hand: {hand_name}")
+        # Clean up community cards list to remove None values
+        community_cards = [card for card in st.session_state.community_cards if card is not None]
+        player_cards = [card for card in st.session_state.player_cards if card is not None]
         
-        # Show best 5 cards if we have at least 5 cards
-        if best_cards:
-            st.markdown("**Best Five Cards:**")
+        all_cards = community_cards + player_cards
+        
+        # Check for duplicate cards
+        if len(all_cards) != len(set(all_cards)):
+            st.error("Duplicate cards detected! Please choose different cards.")
+        elif all_cards:  # Only analyze if we have cards
+            # Analyze hand
+            st.header("Hand Analysis")
             
-            # Create a responsive container for cards
-            st.markdown('<div class="card-container">', unsafe_allow_html=True)
-            best_card_html = ""
-            for card in best_cards:
-                rank, suit = card
-                card_width = 60 if mobile_view else 80
-                card_height = 90 if mobile_view else 120
-                font_size_rank = 16 if mobile_view else 20
-                font_size_suit = 24 if mobile_view else 36
-                margin_top = 10 if mobile_view else 15
+            # Current hand
+            hand_value, hand_name, best_cards = evaluate_hand(player_cards + community_cards)
+            st.subheader(f"Current Hand: {hand_name}")
+            
+            # Show best 5 cards if we have at least 5 cards
+            if best_cards:
+                st.markdown("**Best Five Cards:**")
                 
-                if mobile_view:
-                    best_card_html += f'<div class="card-wrapper">{render_card(rank, suit, width=card_width, height=card_height, font_size_rank=font_size_rank, font_size_suit=font_size_suit, margin_top=margin_top)}</div>'
+                # Create a responsive container for cards
+                st.markdown('<div class="card-container">', unsafe_allow_html=True)
+                best_card_html = ""
+                for card in best_cards:
+                    rank, suit = card
+                    card_width = 60 if mobile_view else 80
+                    card_height = 90 if mobile_view else 120
+                    font_size_rank = 16 if mobile_view else 20
+                    font_size_suit = 24 if mobile_view else 36
+                    margin_top = 10 if mobile_view else 15
+                    
+                    if mobile_view:
+                        best_card_html += f'<div class="card-wrapper">{render_card(rank, suit, width=card_width, height=card_height, font_size_rank=font_size_rank, font_size_suit=font_size_suit, margin_top=margin_top)}</div>'
+                    else:
+                        best_card_html += render_card(rank, suit, width=card_width, height=card_height, font_size_rank=font_size_rank, font_size_suit=font_size_suit, margin_top=margin_top)
+                        
+                st.markdown(best_card_html, unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Find and display helpful cards
+            if num_community < 5:
+                st.header("Potential Helpful Cards")
+                
+                helpful_cards, current_value, current_name = find_helpful_cards(player_cards, community_cards)
+                
+                # Sorting options
+                sort_options = ["Hand Ranking (Best to Worst)", "Probability (Highest to Lowest)"]
+                sort_method = st.radio("Sort potential hands by:", sort_options)
+                
+                if helpful_cards:
+                    # Create a list to hold hand data for sorting
+                    hand_data = []
+                    remaining_cards_count = 52 - len(all_cards)
+                    
+                    for hand_name, cards in helpful_cards.items():
+                        # Calculate ranking value
+                        hand_type = hand_name.split(" (")[0]  # Extract hand type without high card info
+                        hand_rank = HAND_RANKING_VALUES.get(hand_type, 0)
+                        if not hand_rank and "Straight Flush" in hand_type:
+                            hand_rank = 8
+                        elif not hand_rank and "Flush" in hand_type:
+                            hand_rank = 5
+                        
+                        # Calculate probability
+                        probability = (len(cards) / remaining_cards_count) * 100
+                        
+                        # Add to data list
+                        hand_data.append({
+                            'hand_name': hand_name,
+                            'cards': cards,
+                            'rank': hand_rank,
+                            'probability': probability,
+                            'card_count': len(cards)
+                        })
+                    
+                    # Sort based on user choice
+                    if sort_method == "Hand Ranking (Best to Worst)":
+                        sorted_hands = sorted(hand_data, key=lambda x: (x['rank'], x['probability']), reverse=True)
+                    else:  # Probability
+                        sorted_hands = sorted(hand_data, key=lambda x: x['probability'], reverse=True)
+                    
+                    # Display sorted hands
+                    for hand_info in sorted_hands:
+                        hand_name = hand_info['hand_name']
+                        cards = hand_info['cards']
+                        probability = hand_info['probability']
+                        
+                        with st.expander(f"{hand_name} - {len(cards)} possible cards ({probability:.2f}%)"):
+                            # Create a responsive container for cards
+                            st.markdown('<div class="card-container">', unsafe_allow_html=True)
+                            cards_html = ""
+                            
+                            # Group cards by rank for cleaner display
+                            cards_by_rank = {}
+                            for card in cards:
+                                rank, suit = card
+                                if rank not in cards_by_rank:
+                                    cards_by_rank[rank] = []
+                                cards_by_rank[rank].append(suit)
+                            
+                            # Sort ranks by value
+                            sorted_ranks = sorted(cards_by_rank.keys(), key=lambda r: RANK_VALUES[r], reverse=True)
+                            
+                            for rank in sorted_ranks:
+                                suits = cards_by_rank[rank]
+                                # Sort suits for consistency
+                                suits.sort()
+                                for suit in suits:
+                                    card_width = 60 if mobile_view else 80
+                                    card_height = 90 if mobile_view else 120
+                                    font_size_rank = 16 if mobile_view else 20
+                                    font_size_suit = 24 if mobile_view else 36
+                                    margin_top = 10 if mobile_view else 15
+                                    
+                                    if mobile_view:
+                                        cards_html += f'<div class="card-wrapper">{render_card(rank, suit, width=card_width, height=card_height, font_size_rank=font_size_rank, font_size_suit=font_size_suit, margin_top=margin_top)}</div>'
+                                    else:
+                                        cards_html += render_card(rank, suit, width=card_width, height=card_height, font_size_rank=font_size_rank, font_size_suit=font_size_suit, margin_top=margin_top)
+                            
+                            st.markdown(cards_html, unsafe_allow_html=True)
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            
+                            # Show probability details
+                            st.markdown(f"**Probability:** {probability:.2f}% ({len(cards)} out of {remaining_cards_count} remaining cards)")
                 else:
-                    best_card_html += render_card(rank, suit, width=card_width, height=card_height, font_size_rank=font_size_rank, font_size_suit=font_size_suit, margin_top=margin_top)
-                    
-            st.markdown(best_card_html, unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Find and display helpful cards
-        if num_community < 5:
-            st.header("Potential Helpful Cards")
+                    st.write("No cards in the deck will improve your current hand.")
             
-            helpful_cards, current_value, current_name = find_helpful_cards(player_cards, community_cards)
-            
-            # Sorting options
-            sort_options = ["Hand Ranking (Best to Worst)", "Probability (Highest to Lowest)"]
-            sort_method = st.radio("Sort potential hands by:", sort_options)
-            
-            if helpful_cards:
-                # Create a list to hold hand data for sorting
-                hand_data = []
-                remaining_cards_count = 52 - len(all_cards)
+            # Calculate outs and odds
+            if num_community < 5:
+                st.header("Outs and Odds")
                 
-                for hand_name, cards in helpful_cards.items():
-                    # Calculate ranking value
-                    hand_type = hand_name.split(" (")[0]  # Extract hand type without high card info
-                    hand_rank = HAND_RANKING_VALUES.get(hand_type, 0)
-                    if not hand_rank and "Straight Flush" in hand_type:
-                        hand_rank = 8
-                    elif not hand_rank and "Flush" in hand_type:
-                        hand_rank = 5
-                    
-                    # Calculate probability
-                    probability = (len(cards) / remaining_cards_count) * 100
-                    
-                    # Add to data list
-                    hand_data.append({
-                        'hand_name': hand_name,
-                        'cards': cards,
-                        'rank': hand_rank,
-                        'probability': probability,
-                        'card_count': len(cards)
-                    })
+                total_outs = sum(len(cards) for cards in helpful_cards.values())
+                remaining_cards = 52 - len(all_cards)
                 
-                # Sort based on user choice
-                if sort_method == "Hand Ranking (Best to Worst)":
-                    sorted_hands = sorted(hand_data, key=lambda x: (x['rank'], x['probability']), reverse=True)
-                else:  # Probability
-                    sorted_hands = sorted(hand_data, key=lambda x: x['probability'], reverse=True)
+                # Calculate probability based on remaining community cards
+                cards_to_come = 5 - num_community
                 
-                # Display sorted hands
-                for hand_info in sorted_hands:
-                    hand_name = hand_info['hand_name']
-                    cards = hand_info['cards']
-                    probability = hand_info['probability']
-                    
-                    with st.expander(f"{hand_name} - {len(cards)} possible cards ({probability:.2f}%)"):
-                        # Create a responsive container for cards
-                        st.markdown('<div class="card-container">', unsafe_allow_html=True)
-                        cards_html = ""
-                        
-                        # Group cards by rank for cleaner display
-                        cards_by_rank = {}
-                        for card in cards:
-                            rank, suit = card
-                            if rank not in cards_by_rank:
-                                cards_by_rank[rank] = []
-                            cards_by_rank[rank].append(suit)
-                        
-                        # Sort ranks by value
-                        sorted_ranks = sorted(cards_by_rank.keys(), key=lambda r: RANK_VALUES[r], reverse=True)
-                        
-                        for rank in sorted_ranks:
-                            suits = cards_by_rank[rank]
-                            # Sort suits for consistency
-                            suits.sort()
-                            for suit in suits:
-                                card_width = 60 if mobile_view else 80
-                                card_height = 90 if mobile_view else 120
-                                font_size_rank = 16 if mobile_view else 20
-                                font_size_suit = 24 if mobile_view else 36
-                                margin_top = 10 if mobile_view else 15
-                                
-                                if mobile_view:
-                                    cards_html += f'<div class="card-wrapper">{render_card(rank, suit, width=card_width, height=card_height, font_size_rank=font_size_rank, font_size_suit=font_size_suit, margin_top=margin_top)}</div>'
-                                else:
-                                    cards_html += render_card(rank, suit, width=card_width, height=card_height, font_size_rank=font_size_rank, font_size_suit=font_size_suit, margin_top=margin_top)
-                        
-                        st.markdown(cards_html, unsafe_allow_html=True)
-                        st.markdown('</div>', unsafe_allow_html=True)
-                        
-                        # Show probability details
-                        st.markdown(f"**Probability:** {probability:.2f}% ({len(cards)} out of {remaining_cards_count} remaining cards)")
-            else:
-                st.write("No cards in the deck will improve your current hand.")
-        
-        # Calculate outs and odds
-        if num_community < 5:
-            st.header("Outs and Odds")
-            
-            total_outs = sum(len(cards) for cards in helpful_cards.values())
-            remaining_cards = 52 - len(all_cards)
-            
-            # Calculate probability based on remaining community cards
-            cards_to_come = 5 - num_community
-            
-            if cards_to_come == 1:
-                probability = total_outs / remaining_cards
-                st.write(f"**Total Outs:** {total_outs}")
-                st.write(f"**Odds of Improving:** {probability*100:.2f}% (roughly {int(1/probability - 1) if probability > 0 else 'N/A'}-to-1)")
-            elif cards_to_come == 2:
-                # Probability of hitting on either card
-                probability = 1 - ((remaining_cards - total_outs) / remaining_cards) * ((remaining_cards - total_outs - 1) / (remaining_cards - 1))
-                st.write(f"**Total Outs:** {total_outs}")
-                st.write(f"**Odds of Improving:** {probability*100:.2f}% with 2 cards to come")
+                if cards_to_come == 1:
+                    probability = total_outs / remaining_cards
+                    st.write(f"**Total Outs:** {total_outs}")
+                    st.write(f"**Odds of Improving:** {probability*100:.2f}% (roughly {int(1/probability - 1) if probability > 0 else 'N/A'}-to-1)")
+                elif cards_to_come == 2:
+                    # Probability of hitting on either card
+                    probability = 1 - ((remaining_cards - total_outs) / remaining_cards) * ((remaining_cards - total_outs - 1) / (remaining_cards - 1))
+                    st.write(f"**Total Outs:** {total_outs}")
+                    st.write(f"**Odds of Improving:** {probability*100:.2f}% with 2 cards to come")
 
-# Add hand rankings reference
-# with st.expander("Poker Hand Rankings Reference"):
-#     st.markdown("""
-#     1. **Royal Flush**: A, K, Q, J, 10, all the same suit
-#     2. **Straight Flush**: Five cards in a sequence, all in the same suit
-#     3. **Four of a Kind**: Four cards of the same rank
-with st.expander("Poker Hand Rankings Reference"):
-    st.markdown("""
-    1. **Royal Flush**: A, K, Q, J, 10, all the same suit
-    2. **Straight Flush**: Five cards in a sequence, all in the same suit
-    3. **Four of a Kind**: Four cards of the same rank
-    4. **Full House**: Three of a kind with a pair
-    5. **Flush**: Any five cards of the same suit, not in sequence
-    6. **Straight**: Five cards in a sequence, not of the same suit
-    7. **Three of a Kind**: Three cards of the same rank
-    8. **Two Pair**: Two different pairs
-    9. **One Pair**: Two cards of the same rank
-    10. **High Card**: Highest card wins if nobody has any of the above
-    """)
+    # Add hand rankings reference
+    # with st.expander("Poker Hand Rankings Reference"):
+    #     st.markdown("""
+    #     1. **Royal Flush**: A, K, Q, J, 10, all the same suit
+    #     2. **Straight Flush**: Five cards in a sequence, all in the same suit
+    #     3. **Four of a Kind**: Four cards of the same rank
+    # with st.expander("Poker Hand Rankings Reference"):
+    #     st.markdown("""
+    #     1. **Royal Flush**: A, K, Q, J, 10, all the same suit
+    #     2. **Straight Flush**: Five cards in a sequence, all in the same suit
+    #     3. **Four of a Kind**: Four cards of the same rank
+    #     4. **Full House**: Three of a kind with a pair
+    #     5. **Flush**: Any five cards of the same suit, not in sequence
+    #     6. **Straight**: Five cards in a sequence, not of the same suit
+    #     7. **Three of a Kind**: Three cards of the same rank
+    #     8. **Two Pair**: Two different pairs
+    #     9. **One Pair**: Two cards of the same rank
+    #     10. **High Card**: Highest card wins if nobody has any of the above
+    #     """)
