@@ -70,3 +70,4 @@ if st.sidebar.button("Refresh"):
 st.markdown("---")
 st.markdown("*Developed with ❤️ for ~~poker enthusiasts~~ ganjhedis who still can't calculate their hands.*")
 st.markdown("*Sharam karo, khelne se pehle seekh lo.*")
+st.markdown("*Ya toh win hota hai, ya toh lun*")
